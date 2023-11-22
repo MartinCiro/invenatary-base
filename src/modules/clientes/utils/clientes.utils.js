@@ -693,15 +693,14 @@ const existe = (error, datos) =>{
   }
 }
 
-async function getFechas() {
+async function getFechas(element) {
   const pool = await getConnection();
 
   return pool
     .query(
       `
-      SELECT *
-      FROM datosC
-        `
+      SELECT * FROM datos_c where origen=$1;
+        `, element
     )
     .then((data) => {
       return data.rowCount > 0 ? data.rows : null;
@@ -716,6 +715,10 @@ async function getFechas() {
       };
     })
     .finally(() => pool.end());
+}
+
+async function updateIngresos(ingresos){
+  const pool = await getConnection();
 }
 
 /**
@@ -855,6 +858,7 @@ async function crearPermiso(dataPermiso) {
     .finally(() => pool.end);
 }
 
+
 module.exports = {
   insertarCliente,
   updateCliente,
@@ -878,5 +882,6 @@ module.exports = {
   insertarIngreso,
   insertarEgreso,
   crearRol,
-  crearPermiso
+  crearPermiso,
+  updateIngresos
 };

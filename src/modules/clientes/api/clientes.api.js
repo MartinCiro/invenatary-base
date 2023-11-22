@@ -344,10 +344,11 @@ const actualizarCalendarioAPI = async (req, res) => {
 };
 
 const listarFechasAPI = async (req, res) => {
+  const { element } = req.query;
+  console.log(element);
   let message;
-
     try {
-        const resultado = await getListarFechas();
+        const resultado = await getListarFechas(element);
         message = new ResponseBody(true, 200, resultado);
     } catch (error) {
         if (error.status_cod) {

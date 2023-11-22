@@ -476,7 +476,8 @@ async function selectUVT_Cliente(id_cliente, uvt, digito_verificacion, nit) {
   return uvtCliente;
 }
 
-async function getListarFechas() {
+async function getListarFechas(element) {
+  clienteUtils.validar(element, "el elemento");
   try {
       return await clienteUtils.getFechas();
   } catch (error) {
