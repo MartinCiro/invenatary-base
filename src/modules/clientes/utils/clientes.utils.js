@@ -756,9 +756,6 @@ async function updateFechas(options) {
     .finally(() => pool.end());
 }
 
-async function updateIngresos(ingresos) {
-  const pool = await getConnection();
-}
 
 /**
  * @param {{
@@ -823,6 +820,20 @@ async function insertarEgreso(egreso) {
       return data.rows[0];
     })
     .catch((error) => {
+      if (error.code === "23505") {
+        throw {
+          ok: false,
+          status_cod: 400,
+          data: "La fecha ya existe",
+        };
+      }
+      if (error.code === "23503") {
+        throw {
+          ok: false,
+          status_cod: 400,
+          data: "El registro solicitado no existe",
+        };
+      }
       console.log(error);
       throw {
         ok: false,
@@ -914,5 +925,4 @@ module.exports = {
   insertarEgreso,
   crearRol,
   crearPermiso,
-  updateIngresos,
 };
