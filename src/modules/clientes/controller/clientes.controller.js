@@ -491,12 +491,32 @@ async function getListarFechas(element) {
   }
 }
 
+async function actualizarFecha(options) {
+  const { tabla, id, descripcion, monto, fecha } = options;
+
+  clienteUtils.validar(tabla, "el nombre de la tabla");
+  clienteUtils.validar(id, "el id de la fecha");
+  clienteUtils.validar(descripcion, "la descripcion de la fecha");
+  clienteUtils.validar(monto, "el monto de la fecha");
+  clienteUtils.validar(fecha, "la fecha");
+  await clienteUtils.updateFechas(options)
+  .catch((error) => {
+    if (error.status_cod) throw error;
+    console.log(error);
+    throw {
+      ok: false,
+      status_cod: 500,
+      data: "Ocurrió un error inesperado y el cliente no ha sido actualizado",
+    };
+  });
+}
+
 async function insertarIngreso(ingreso) {
-  const { descripcion, monto, fechaing } = ingreso;
+  const { descripcion, monto, fecha } = ingreso;
 
   clienteUtils.validar(descripcion, "la descripción");
   clienteUtils.validar(monto, "el monto");
-  clienteUtils.validar(fechaing, "la fecha de ingreso");
+  clienteUtils.validar(fecha, "la fecha de ingreso");
 
   return await clienteUtils
     .insertarIngreso(ingreso)
@@ -515,12 +535,12 @@ async function insertarIngreso(ingreso) {
 }
 
 async function insertarEgreso(egreso) {
-  const { idi, descripcion, monto, fechaing } = egreso;
+  const { idi, descripcion, monto, fecha } = egreso;
 
   clienteUtils.validar(idi, "el id del ingreso");
   clienteUtils.validar(descripcion, "la descripción");
   clienteUtils.validar(monto, "el monto");
-  clienteUtils.validar(fechaing, "la fecha de egreso");
+  clienteUtils.validar(fecha, "la fecha de egreso");
 
   return await clienteUtils
     .insertarEgreso(egreso)
@@ -593,6 +613,7 @@ module.exports = {
   selectUVT_Cliente,
   cargarCalendariosMasivo,
   getListarFechas,
+  actualizarFecha,
   insertarIngreso,
   insertarEgreso,
   crearRol,

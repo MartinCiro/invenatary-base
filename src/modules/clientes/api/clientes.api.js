@@ -9,10 +9,11 @@ const {
   selectUVT_Cliente,
   cargarCalendariosMasivo,
   getListarFechas,
+  actualizarFecha,
   insertarIngreso,
   insertarEgreso,
   crearRol,
-  crearPermiso
+  crearPermiso,
 } = require("../controller/clientes.controller");
 const ResponseBody = require("../../../shared/model/ResponseBody.model");
 
@@ -346,28 +347,68 @@ const actualizarCalendarioAPI = async (req, res) => {
 const listarFechasAPI = async (req, res) => {
   const element = req.query.element;
   let message;
-    try {
-        const resultado = await getListarFechas(element);
-        message = new ResponseBody(true, 200, resultado);
-    } catch (error) {
-        if (error.status_cod) {
-            message = new ResponseBody(error.ok, error.status_cod, error.data);
-        } else {
-            console.log(error);
-            message = new ResponseBody(false, 500, 'Ocurrió un error en el proceso para listar las fechas');
-        }
+  try {
+    const resultado = await getListarFechas(element);
+    message = new ResponseBody(true, 200, resultado);
+  } catch (error) {
+    if (error.status_cod) {
+      message = new ResponseBody(error.ok, error.status_cod, error.data);
+    } else {
+      console.log(error);
+      message = new ResponseBody(
+        false,
+        500,
+        "Ocurrió un error en el proceso para listar las fechas"
+      );
     }
+  }
 
-    return res.json(message);
-}
+  return res.json(message);
+};
+
+const actualizarFechaAPI = async (req, res) => {
+  const { tabla, id, descripcion, monto, fecha } = req.body;
+
+  if (!id || !tabla) {
+    return res.json({
+      ok: false,
+      status_cod: 400,
+      data: "No se ha proporcionado id o tabla",
+    });
+  }
+  try {
+    await actualizarFecha({
+      tabla,
+      id,
+      descripcion,
+      monto,
+      fecha,
+    });
+    message = new ResponseBody(true, 200, {
+      message: "Se ha actualizado los datos exitosamente",
+    });
+  } catch (error) {
+    if (error.status_cod) {
+      message = new ResponseBody(error.ok, error.status_cod, error.data);
+    } else {
+      console.log(error);
+      message = new ResponseBody(false, 500, {
+        message:
+          "Ha ocurrido un error inesperado. Por favor inténtelo nuevamente más tarde.",
+      });
+    }
+  }
+
+  return res.json(message);
+};
 
 const crearIngresoAPI = async (req, res) => {
-  const { descripcion, monto, fechaing } = req.body;
+  const { descripcion, monto, fecha } = req.body;
 
   /* const { id_sede } = req.userData; */
 
   try {
-    contratoResponse = await insertarIngreso({descripcion, monto, fechaing});
+    contratoResponse = await insertarIngreso({ descripcion, monto, fecha });
     message = new ResponseBody(true, 200, {
       message: "Se ha creado el ingreso exitosamente",
     });
@@ -386,10 +427,15 @@ const crearIngresoAPI = async (req, res) => {
 };
 
 const crearEgresoAPI = async (req, res) => {
-  const { idi, descripcion, monto, fechaing } = req.body;
+  const { idi, descripcion, monto, fecha } = req.body;
 
   try {
-    contratoResponse = await insertarEgreso({idi, descripcion, monto, fechaing});
+    contratoResponse = await insertarEgreso({
+      idi,
+      descripcion,
+      monto,
+      fecha,
+    });
     message = new ResponseBody(true, 200, {
       message: "Se ha creado el egreso exitosamente",
     });
@@ -411,7 +457,7 @@ const crearRolAPI = async (req, res) => {
   const { nombre, descripcion } = req.body;
 
   try {
-    contratoResponse = await crearRol({nombre, descripcion});
+    contratoResponse = await crearRol({ nombre, descripcion });
     message = new ResponseBody(true, 200, {
       message: "Se ha creado el rol exitosamente",
     });
@@ -433,7 +479,7 @@ const crearPermisoAPI = async (req, res) => {
   const { nombre, descripcion } = req.body;
 
   try {
-    contratoResponse = await crearPermiso({nombre, descripcion});
+    contratoResponse = await crearPermiso({ nombre, descripcion });
     message = new ResponseBody(true, 200, {
       message: "Se ha creado el permiso exitosamente",
     });
@@ -459,8 +505,9 @@ module.exports = {
   getClientePageAPI,
   actualizarCalendarioAPI,
   listarFechasAPI,
+  actualizarFechaAPI,
   crearIngresoAPI,
   crearEgresoAPI,
   crearRolAPI,
-  crearPermisoAPI
+  crearPermisoAPI,
 };

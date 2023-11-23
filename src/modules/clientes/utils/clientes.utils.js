@@ -676,30 +676,31 @@ const validar = (valor, nombre) => {
       status_cod: 400,
       data: `No se ha proporcionado ${nombre}`,
     };
-}
+};
 
-const existe = (error, datos) =>{
+const existe = (error, datos) => {
   const errorMessages = {
     duplicateEntry: (field) => `El ${field} ya existe`,
   };
 
   if (error.code === "23505") {
-    const field = datos; 
+    const field = datos;
     throw {
       ok: false,
       status_cod: 400,
       data: errorMessages.duplicateEntry(field),
     };
   }
-}
+};
 
 async function getFechas(element) {
   const pool = await getConnection();
   return pool
     .query(
       `
-      SELECT mes, descripcion, monto, fecha, idi, ide_egresos FROM datos_c where origen=$1;
-        `, [element]
+      SELECT mes, descripcion, monto, fecha, id, ide FROM datos_c where origen=$1;
+        `,
+      [element]
     )
     .then((data) => {
       return data.rowCount > 0 ? data.rows : null;
@@ -716,7 +717,46 @@ async function getFechas(element) {
     .finally(() => pool.end());
 }
 
-async function updateIngresos(ingresos){
+async function updateFechas(options) {
+  const { tabla, id, descripcion, monto, fecha } = options;
+
+  const pool = await getConnection();
+
+  return pool
+    .query(
+      `
+    UPDATE ${tabla} SET
+    descripcion = $1,
+    monto = $2,
+    fecha = $3
+    WHERE id = $4;
+  `,
+      [descripcion, monto, fecha, id]
+    )
+    .then((data) => {
+      if (data.rowCount == 0)
+        throw {
+          ok: false,
+          status_cod: 500,
+          data: "No se pudo actualizar la informacion",
+        };
+    })
+    .catch((error) => {
+      if (error.status_cod) throw error;
+      console.error(
+        "Ocurrió un error actualizando la informacion en la base de datos",
+        error
+      );
+      throw {
+        ok: false,
+        status_cod: 500,
+        data: `Ocurrió un error en base de datos actualizando el cliente`,
+      };
+    })
+    .finally(() => pool.end());
+}
+
+async function updateIngresos(ingresos) {
   const pool = await getConnection();
 }
 
@@ -729,20 +769,19 @@ async function updateIngresos(ingresos){
  */
 async function insertarIngreso(ingreso) {
   const pool = await getConnection();
-  const mes = new Date(ingreso.fechaing).getMonth() + 1;
+  const mes = new Date(ingreso.fecha).getMonth() + 1;
   const params = [
     mes,
     ingreso.descripcion,
     ingreso.monto,
-    "{" + ingreso.fechaing+"}",
+    "{" + ingreso.fecha + "}",
   ];
 
   return pool
     .query(
       `
-       INSERT INTO ingresos (mesin, descripcion, monto, fechaing)
+       INSERT INTO ingresos (mes, descripcion, monto, fecha)
        VALUES ($1, $2, $3, $4)
-       RETURNING idi;
    `,
       params
     )
@@ -762,22 +801,21 @@ async function insertarIngreso(ingreso) {
 
 async function insertarEgreso(egreso) {
   const pool = await getConnection();
-  const mes = new Date(egreso.fechaing).getMonth() + 1;
+  const mes = new Date(egreso.fecha).getMonth() + 1;
 
   const params = [
-    egreso.idi, 
+    egreso.idi,
     mes,
     egreso.descripcion,
     egreso.monto,
-    "{" + egreso.fechaing+"}",
+    "{" + egreso.fecha + "}",
   ];
 
   return pool
     .query(
       `
-       INSERT INTO egresos (idi, "mesE", "descripcionE", "montoE", "fechaE")
+       INSERT INTO egresos (idi, mes, descripcion, monto, fecha)
        VALUES ($1, $2, $3, $4, $5)
-       RETURNING ide;
    `,
       params
     )
@@ -798,10 +836,7 @@ async function insertarEgreso(egreso) {
 async function crearRol(dataRol) {
   const pool = await getConnection();
 
-  const params = [
-    dataRol.nombre,
-    dataRol.descripcion
-  ];
+  const params = [dataRol.nombre, dataRol.descripcion];
 
   return pool
     .query(
@@ -829,10 +864,7 @@ async function crearRol(dataRol) {
 async function crearPermiso(dataPermiso) {
   const pool = await getConnection();
 
-  const params = [
-    dataPermiso.nombre,
-    dataPermiso.descripcion
-  ];
+  const params = [dataPermiso.nombre, dataPermiso.descripcion];
 
   return pool
     .query(
@@ -857,7 +889,6 @@ async function crearPermiso(dataPermiso) {
     .finally(() => pool.end);
 }
 
-
 module.exports = {
   insertarCliente,
   updateCliente,
@@ -877,10 +908,11 @@ module.exports = {
   insertarPeriodos,
   descargarPlantillaActualizada,
   getFechas,
+  updateFechas,
   validar,
   insertarIngreso,
   insertarEgreso,
   crearRol,
   crearPermiso,
-  updateIngresos
+  updateIngresos,
 };
