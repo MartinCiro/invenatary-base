@@ -344,8 +344,7 @@ const actualizarCalendarioAPI = async (req, res) => {
 };
 
 const listarFechasAPI = async (req, res) => {
-  const { element } = req.query;
-  console.log(element);
+  const element = req.query.element;
   let message;
     try {
         const resultado = await getListarFechas(element);

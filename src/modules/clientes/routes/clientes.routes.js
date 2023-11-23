@@ -74,7 +74,7 @@ router.post('/contrato/crearContrato', isAuthenticatedMW, checkPermissions([1, 2
  */
 router.delete('/clientes/usuario', isAuthenticatedMW, checkPermissions([1, 2]), asignacionUsuariosAPI);
 
-router.get('listar', listarFechasAPI);
+router.get('/listar', listarFechasAPI);
 
 router.post('/clientes/RUT', actualizarCalendarioAPI);
 

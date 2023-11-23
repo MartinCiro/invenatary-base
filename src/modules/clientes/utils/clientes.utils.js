@@ -695,12 +695,11 @@ const existe = (error, datos) =>{
 
 async function getFechas(element) {
   const pool = await getConnection();
-
   return pool
     .query(
       `
-      SELECT * FROM datos_c where origen=$1;
-        `, element
+      SELECT mes, descripcion, monto, fecha, idi, ide_egresos FROM datos_c where origen=$1;
+        `, [element]
     )
     .then((data) => {
       return data.rowCount > 0 ? data.rows : null;
