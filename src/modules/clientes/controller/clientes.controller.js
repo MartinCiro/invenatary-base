@@ -542,8 +542,7 @@ async function insertarEgreso(egreso) {
   clienteUtils.validar(monto, "el monto");
   clienteUtils.validar(fecha, "la fecha de egreso");
 
-  return await clienteUtils
-    .insertarEgreso(egreso)
+  return await clienteUtils.insertarEgreso(egreso)
     .then((data) => {
       return data;
     })
