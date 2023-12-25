@@ -5,8 +5,6 @@ const {
   crearContrato,
   asignarUsuarios,
   getClientePage,
-  extractRut,
-  selectUVT_Cliente,
   cargarCalendariosMasivo,
   getListarFechas,
   actualizarFecha,
@@ -14,6 +12,7 @@ const {
   insertarEgreso,
   crearRol,
   crearPermiso,
+  deleteFechas,
 } = require("../controller/clientes.controller");
 const ResponseBody = require("../../../shared/model/ResponseBody.model");
 
@@ -496,6 +495,28 @@ const crearPermisoAPI = async (req, res) => {
 
   return res.json(message);
 };
+
+const deleteFechasAPI = async (req, res) => {
+  const {id, ide}  = req.query;
+  let message;
+  try {
+    const resultado = await deleteFechas({id, ide});
+    message = new ResponseBody(true, 200, resultado);
+  } catch (error) {
+    if (error.status_cod) {
+      message = new ResponseBody(error.ok, error.status_cod, error.data);
+    } else {
+      console.log(error);
+      message = new ResponseBody(
+        false,
+        500,
+        "Ocurrió un error en el proceso para listar las fechas"
+      );
+    }
+  }
+
+  return res.json(message);
+};
 module.exports = {
   crearClienteAPI,
   actualizarClienteAPI,
@@ -510,4 +531,5 @@ module.exports = {
   crearEgresoAPI,
   crearRolAPI,
   crearPermisoAPI,
+  deleteFechasAPI,
 };

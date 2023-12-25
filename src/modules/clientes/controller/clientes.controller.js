@@ -1,6 +1,7 @@
 const clienteUtils = require("../utils/clientes.utils");
 const impuestoUtils = require("../utils/impuesto.utils");
 const { requestAPIRUT } = require("../../../shared/services/api.service");
+const { utils } = require("xlsx");
 
 /**
  *
@@ -477,7 +478,6 @@ async function selectUVT_Cliente(id_cliente, uvt, digito_verificacion, nit) {
 }
 
 async function getListarFechas(element) {
-  clienteUtils.validar(element, "el elemento");
   try {
       return await clienteUtils.getFechas(element);
   } catch (error) {
@@ -600,6 +600,27 @@ async function crearPermiso(dataPermiso) {
     });
 }
 
+async function deleteFechas(iden) {
+  const { ide, id } = iden
+  const tipo = (
+    (id !== undefined && ide !== undefined && !/^\s*$/.test(ide) && ide !== 'undefined') ? "egresos" :
+    (id !== undefined && (ide === undefined || ide === 'undefined' || ide !== null || ide !== 'null')) ? "ingresos" :
+    null
+  );
+  
+  clienteUtils.validar(id, "el id");
+  try {
+      return await clienteUtils.deleteFechas({id, tipo});
+  } catch (error) {
+      if (error.status_cod) throw error;
+      console.log(error);
+      throw {
+          ok: false,
+          status_cod: 500,
+          data: 'Ha ocurrido un error consultando la información en base de datos'
+      }
+  }
+}
 module.exports = {
   crearCliente,
   modificarCliente,
@@ -616,5 +637,6 @@ module.exports = {
   insertarIngreso,
   insertarEgreso,
   crearRol,
-  crearPermiso
+  crearPermiso,
+  deleteFechas
 };

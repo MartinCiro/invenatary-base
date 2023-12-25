@@ -5,7 +5,7 @@ const { exec } = require('child_process');
 
 // api handlers
 const { crearClienteAPI, actualizarClienteAPI, listarClientesAPI, crearContratoAPI,
-    asignacionUsuariosAPI, getClientePageAPI, actualizarCalendarioAPI, listarFechasAPI, actualizarFechaAPI, crearIngresoAPI, crearEgresoAPI, crearRolAPI, crearPermisoAPI } = require('../api/clientes.api');
+    asignacionUsuariosAPI, getClientePageAPI, actualizarCalendarioAPI, listarFechasAPI, actualizarFechaAPI, crearIngresoAPI, crearEgresoAPI, crearRolAPI, crearPermisoAPI, deleteFechasAPI } = require('../api/clientes.api');
 const { isAuthenticatedMW, checkPermissions } = require('../../auth/api/auth.api');
 
 
@@ -74,9 +74,11 @@ router.post('/contrato/crearContrato', isAuthenticatedMW, checkPermissions([1, 2
  */
 router.delete('/clientes/usuario', isAuthenticatedMW, checkPermissions([1, 2]), asignacionUsuariosAPI);
 
-router.get('/fechas/listar', listarFechasAPI);
+router.get('/fechas/', listarFechasAPI);
 
-router.patch('/fechas/actualizarFecha', actualizarFechaAPI);
+router.patch('/fechas/', actualizarFechaAPI);
+
+router.delete('/fechas/', deleteFechasAPI);
 
 router.post('/clientes/RUT', actualizarCalendarioAPI);
 
@@ -87,4 +89,5 @@ router.post('/crearEgreso', crearEgresoAPI);
 router.post('/crearRol', crearRolAPI);
 
 router.post('/crearPermiso', crearPermisoAPI);
+
 module.exports = router;

@@ -51,7 +51,6 @@ async function insertarCliente(cliente) {
           status_cod: 409,
           data: "El cliente se encuentra repetido",
         };
-      console.log(error);
       throw {
         ok: false,
         status_cod: 500,
@@ -104,7 +103,6 @@ async function deleteClientRelationship(id_usuario, id_cliente) {
     )
     .then((data) => data.rowCount > 0)
     .catch((error) => {
-      console.log(error);
       throw {
         ok: false,
         status_cod: 500,
@@ -165,7 +163,6 @@ async function fetchClientes(options) {
       return data.rows;
     })
     .catch((error) => {
-      console.log(error);
       throw {
         ok: false,
         status_cod: 500,
@@ -367,7 +364,6 @@ async function getInfoCliente(id_cliente) {
     })
     .catch((error) => {
       if (error.status_cod) throw error;
-      console.log(error);
       throw {
         ok: false,
         status_cod: 500,
@@ -396,7 +392,6 @@ async function consultarRol(id_rol) {
       return data.rows;
     })
     .catch((error) => {
-      console.log(error);
       throw {
         ok: false,
         status_cod: 500,
@@ -439,7 +434,7 @@ async function insertarContrato(contrato) {
       return data.rows[0];
     })
     .catch((error) => {
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -487,7 +482,7 @@ async function getClienteProfile(id_cliente) {
     })
     .catch((error) => {
       if (error.status_cod) throw error;
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 404,
@@ -525,7 +520,7 @@ async function fetchUsuarioxcliente(id_cliente) {
     )
     .then((data) => data.rows)
     .catch((error) => {
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -587,7 +582,7 @@ async function descargarPlantillaActualizada() {
       console.log("plantilla actualizada");
     })
     .catch((error) => {
-      console.log(error);
+      
     });
 }
 
@@ -622,7 +617,7 @@ async function insertarCalendario(calendario) {
           data: "El impuesto o periodo ya existe",
         };
       }
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -659,7 +654,7 @@ async function UVT_Cliente(id_cliente, uvt, digito_verificacion, nit) {
       return data.rows[0];
     })
     .catch((error) => {
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -695,27 +690,48 @@ const existe = (error, datos) => {
 
 async function getFechas(element) {
   const pool = await getConnection();
-  return pool
-    .query(
-      `
-      SELECT mes, descripcion, monto, fecha, id, ide FROM datos_c where origen=$1;
+  if (element === undefined) {
+    return pool
+      .query(
+        "SELECT origen, mes, descripcion, monto, fecha, id, ide FROM datos_c"
+      )
+      .then((data) => {
+        return data.rowCount > 0 ? data.rows : null;
+      })
+      .catch((error) => {
+        if (error.status_cod) throw error;
+        error.status_cod ? error : null;
+        throw {
+          ok: false,
+          status_cod: 500,
+          data: "Ha ocurrido un error consultando la información en la base de datos",
+        };
+      })
+      .finally(() => pool.end());
+  } else {
+    return pool
+      .query(
+        `
+        SELECT mes, descripcion, monto, fecha, id, ide FROM datos_c where origen=$1;
         `,
-      [element]
-    )
-    .then((data) => {
-      return data.rowCount > 0 ? data.rows : null;
-    })
-    .catch((error) => {
-      if (error.status_cod) throw error;
-      error.status_cod ? error : null;
-      throw {
-        ok: false,
-        status_cod: 500,
-        data: "Ha ocurrido un error consultando la información en base de datos",
-      };
-    })
-    .finally(() => pool.end());
+        [element]
+      )
+      .then((data) => {
+        return data.rowCount > 0 ? data.rows : null;
+      })
+      .catch((error) => {
+        if (error.status_cod) throw error;
+        error.status_cod ? error : null;
+        throw {
+          ok: false,
+          status_cod: 500,
+          data: "Ha ocurrido un error consultando la información en la base de datos",
+        };
+      })
+      .finally(() => pool.end());
+  }
 }
+
 
 async function updateFechas(options) {
   const { tabla, id, descripcion, monto, fecha } = options;
@@ -786,7 +802,7 @@ async function insertarIngreso(ingreso) {
       return data.rows[0];
     })
     .catch((error) => {
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -834,7 +850,7 @@ async function insertarEgreso(egreso) {
           data: "El registro solicitado no existe",
         };
       }
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -862,7 +878,7 @@ async function crearRol(dataRol) {
     })
     .catch((error) => {
       existe(error, "rol");
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -890,7 +906,7 @@ async function crearPermiso(dataPermiso) {
     })
     .catch((error) => {
       existe(error, "permiso");
-      console.log(error);
+      
       throw {
         ok: false,
         status_cod: 500,
@@ -898,6 +914,28 @@ async function crearPermiso(dataPermiso) {
       };
     })
     .finally(() => pool.end);
+}
+
+async function deleteFechas(dato) {
+  const pool = await getConnection();
+  const params = [dato.id];
+    return pool
+      .query(
+        `delete from ${dato.tipo} where id=$1`, params
+      )
+      .then((data) => {
+        return data.rowCount > 0 ? `El ${dato.tipo} se elimino correctamente` : `El ${dato.tipo} no existe`;
+      })
+      .catch((error) => {
+        if (error.status_cod) throw error;
+        error.status_cod ? error : null;
+        throw {
+          ok: false,
+          status_cod: 500,
+          data: "Ha ocurrido un error consultando la información en la base de datos",
+        };
+      })
+      .finally(() => pool.end());  
 }
 
 module.exports = {
@@ -925,4 +963,5 @@ module.exports = {
   insertarEgreso,
   crearRol,
   crearPermiso,
+  deleteFechas
 };
