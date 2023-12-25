@@ -1,17 +1,17 @@
 {
-  "name": "nexiaautomation-backend",
+  "name": "inventario-backend",
   "version": "1.0.0",
-  "description": "Backend para automatización de procesos de auditoria, para Nexia International  ",
+  "description": "Backend para control de in/egresos personalizado",
   "main": "./src/index.js",
   "scripts": {
     "dev": "nodemon ./src/index.js"
   },
   "keywords": [
-    "nexia",
-    "automatizacion",
-    "auditoria"
+    "control",
+    "ingresos",
+    "egresos"
   ],
-  "author": "YAWI Automation",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.4.0",
@@ -27,6 +27,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "morgan": "^1.10.0",
     "nodemon": "^3.0.1"
   }
 }

@@ -431,7 +431,8 @@ async function cargarCalendariosMasivo(file64) {
         }) - 1;
 
     const excelBaseDate = new Date(Date.UTC(1899, 11, 30));
-    const mili = excelBaseDate.getTime() + (vencimiento.fecha + 1) * 24 * 60 * 60 * 1000;
+    const mili =
+      excelBaseDate.getTime() + (vencimiento.fecha + 1) * 24 * 60 * 60 * 1000;
 
     vencimiento.fecha = new Date(mili);
 
@@ -443,7 +444,8 @@ async function cargarCalendariosMasivo(file64) {
 
   for (const calendario of calendarios) {
     let idCalendario = await clienteUtils.insertarCalendario(calendario);
-    for (const periodo of calendario.periodos) { //retirar en caso de querer enviar solo un dato
+    for (const periodo of calendario.periodos) {
+      //retirar en caso de querer enviar solo un dato
       await clienteUtils.insertarPeriodos(idCalendario, periodo);
     }
   }
@@ -479,15 +481,15 @@ async function selectUVT_Cliente(id_cliente, uvt, digito_verificacion, nit) {
 
 async function getListarFechas(element) {
   try {
-      return await clienteUtils.getFechas(element);
+    return await clienteUtils.getFechas(element);
   } catch (error) {
-      if (error.status_cod) throw error;
-      console.log(error);
-      throw {
-          ok: false,
-          status_cod: 500,
-          data: 'Ha ocurrido un error consultando la información en base de datos'
-      }
+    if (error.status_cod) throw error;
+    console.log(error);
+    throw {
+      ok: false,
+      status_cod: 500,
+      data: "Ha ocurrido un error consultando la información en base de datos",
+    };
   }
 }
 
@@ -499,8 +501,7 @@ async function actualizarFecha(options) {
   clienteUtils.validar(descripcion, "la descripcion de la fecha");
   clienteUtils.validar(monto, "el monto de la fecha");
   clienteUtils.validar(fecha, "la fecha");
-  await clienteUtils.updateFechas(options)
-  .catch((error) => {
+  await clienteUtils.updateFechas(options).catch((error) => {
     if (error.status_cod) throw error;
     console.log(error);
     throw {
@@ -542,7 +543,8 @@ async function insertarEgreso(egreso) {
   clienteUtils.validar(monto, "el monto");
   clienteUtils.validar(fecha, "la fecha de egreso");
 
-  return await clienteUtils.insertarEgreso(egreso)
+  return await clienteUtils
+    .insertarEgreso(egreso)
     .then((data) => {
       return data;
     })
@@ -601,24 +603,29 @@ async function crearPermiso(dataPermiso) {
 }
 
 async function deleteFechas(iden) {
-  const { ide, id } = iden
-  const tipo = (
-    (id !== undefined && ide !== undefined && !/^\s*$/.test(ide) && ide !== 'undefined') ? "egresos" :
-    (id !== undefined && (ide === undefined || ide === 'undefined' || ide !== null || ide !== 'null')) ? "ingresos" :
-    null
-  );
-  
+  let { id } = iden;
+  const { ide } = iden;
+  let tipo;
+  if (id !== undefined && ide !== "null") {
+    tipo = "egresos";
+    id = ide;
+  } else if (id !== undefined && ide === "null") {
+    tipo = "ingresos";
+  } else {
+    tipo = null;
+  }
+
   clienteUtils.validar(id, "el id");
   try {
-      return await clienteUtils.deleteFechas({id, tipo});
+    return await clienteUtils.deleteFechas({ id, tipo });
   } catch (error) {
-      if (error.status_cod) throw error;
-      console.log(error);
-      throw {
-          ok: false,
-          status_cod: 500,
-          data: 'Ha ocurrido un error consultando la información en base de datos'
-      }
+    if (error.status_cod) throw error;
+    console.log(error);
+    throw {
+      ok: false,
+      status_cod: 500,
+      data: "Ha ocurrido un error consultando la información en base de datos",
+    };
   }
 }
 module.exports = {
@@ -638,5 +645,5 @@ module.exports = {
   insertarEgreso,
   crearRol,
   crearPermiso,
-  deleteFechas
+  deleteFechas,
 };
