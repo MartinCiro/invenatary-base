@@ -366,23 +366,14 @@ const listarFechasAPI = async (req, res) => {
 };
 
 const actualizarFechaAPI = async (req, res) => {
-  const { tabla, id, descripcion, monto, fecha } = req.body;
-
-  if (!id || !tabla) {
-    return res.json({
-      ok: false,
-      status_cod: 400,
-      data: "No se ha proporcionado id o tabla",
-    });
+  let message;
+  const { ide, tabla, cambio, campo } = req.body;
+  let { id } = req.body;
+  if (id === null && (ide !== "null" || ide !== null)) {
+    id = ide;
   }
   try {
-    await actualizarFecha({
-      tabla,
-      id,
-      descripcion,
-      monto,
-      fecha,
-    });
+    await actualizarFecha({ id, tabla, cambio, campo });
     message = new ResponseBody(true, 200, {
       message: "Se ha actualizado los datos exitosamente",
     });

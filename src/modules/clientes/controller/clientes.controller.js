@@ -494,13 +494,12 @@ async function getListarFechas(element) {
 }
 
 async function actualizarFecha(options) {
-  const { tabla, id, descripcion, monto, fecha } = options;
-
+  const { tabla, id, cambio, campo } = options;
+console.log(id)
   clienteUtils.validar(tabla, "el nombre de la tabla");
-  clienteUtils.validar(id, "el id de la fecha");
-  clienteUtils.validar(descripcion, "la descripcion de la fecha");
-  clienteUtils.validar(monto, "el monto de la fecha");
-  clienteUtils.validar(fecha, "la fecha");
+  clienteUtils.validar(id, "el elemento a modificar");
+  clienteUtils.validar(cambio, "el nuevo valor");
+  clienteUtils.validar(campo, "el campo a modificar");
   await clienteUtils.updateFechas(options).catch((error) => {
     if (error.status_cod) throw error;
     console.log(error);
