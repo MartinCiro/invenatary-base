@@ -495,7 +495,6 @@ async function getListarFechas(element) {
 
 async function actualizarFecha(options) {
   const { tabla, id, cambio, campo } = options;
-console.log(id)
   clienteUtils.validar(tabla, "el nombre de la tabla");
   clienteUtils.validar(id, "el elemento a modificar");
   clienteUtils.validar(cambio, "el nuevo valor");
@@ -511,15 +510,16 @@ console.log(id)
   });
 }
 
-async function insertarIngreso(ingreso) {
-  const { descripcion, monto, fecha } = ingreso;
+async function crear(options) {
+  const { id, descripcion, monto, fecha, tipo } = options;
 
   clienteUtils.validar(descripcion, "la descripción");
   clienteUtils.validar(monto, "el monto");
   clienteUtils.validar(fecha, "la fecha de ingreso");
+  clienteUtils.validar(tipo, "el tipo de ingreso/egreso");
 
   return await clienteUtils
-    .insertarIngreso(ingreso)
+    .insertarValor(options)
     .then((data) => {
       return data;
     })
@@ -530,30 +530,6 @@ async function insertarIngreso(ingreso) {
         ok: false,
         status_cod: 500,
         data: "Ocurrió un error inesperado y el registro ingreso no ha sido creado",
-      };
-    });
-}
-
-async function insertarEgreso(egreso) {
-  const { idi, descripcion, monto, fecha } = egreso;
-
-  clienteUtils.validar(idi, "el id del ingreso");
-  clienteUtils.validar(descripcion, "la descripción");
-  clienteUtils.validar(monto, "el monto");
-  clienteUtils.validar(fecha, "la fecha de egreso");
-
-  return await clienteUtils
-    .insertarEgreso(egreso)
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      if (error.status_cod) throw error;
-      console.log(error);
-      throw {
-        ok: false,
-        status_cod: 500,
-        data: "Ocurrió un error inesperado y el registro egreso no ha sido creado",
       };
     });
 }
@@ -627,6 +603,20 @@ async function deleteFechas(iden) {
     };
   }
 }
+
+async function sumarFechas() {
+  try {
+    return await clienteUtils.sumarFechas();
+  } catch (error) {
+    if (error.status_cod) throw error;
+    console.log(error);
+    throw {
+      ok: false,
+      status_cod: 500,
+      data: "Ha ocurrido un error consultando la información en base de datos",
+    };
+  }
+}
 module.exports = {
   crearCliente,
   modificarCliente,
@@ -640,9 +630,9 @@ module.exports = {
   cargarCalendariosMasivo,
   getListarFechas,
   actualizarFecha,
-  insertarIngreso,
-  insertarEgreso,
+  crear,
   crearRol,
   crearPermiso,
   deleteFechas,
+  sumarFechas
 };

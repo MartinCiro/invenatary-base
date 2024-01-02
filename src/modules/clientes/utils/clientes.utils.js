@@ -762,20 +762,23 @@ async function updateFechas(options) {
  *          fecha_ingreso: Date,
  *      }} ingreso
  */
-async function insertarIngreso(ingreso) {
+async function insertarValor(options) {
   const pool = await getConnection();
-  const mes = new Date(ingreso.fecha).getMonth() + 1;
+  const tipo = options.tipo;
   const params = [
-    ingreso.descripcion,
-    ingreso.monto,
-    "{" + ingreso.fecha + "}",
+    options.descripcion,
+    options.monto,
+    "{" + options.fecha + "}",
   ];
 
-  return pool
+  if(tipo === "egreso"){
+    params.push(options.id);
+    console.log(params)
+    return pool
     .query(
       `
-       INSERT INTO ingresos (descripcion, monto, fecha)
-       VALUES ($1, $2, $3)
+       INSERT INTO egresos (descripcion, monto, fecha, idi)
+       VALUES ($1, $2, $3, $4) RETURNING id
    `,
       params
     )
@@ -791,45 +794,22 @@ async function insertarIngreso(ingreso) {
       };
     })
     .finally(() => pool.end);
-}
-
-async function insertarEgreso(egreso) {
-  const pool = await getConnection();
-
-  const params = [
-    egreso.idi,
-    egreso.descripcion,
-    egreso.monto,
-    "{" + egreso.fecha + "}",
-  ];
-
+}else if (tipo === "ingreso"){
+  console.log(params)
   return pool
     .query(
       `
-       INSERT INTO egresos (idi, descripcion, monto, fecha)
-       VALUES ($1, $2, $3, $4)
+       INSERT INTO ingresos (descripcion, monto, fecha)
+       VALUES ($1, $2, $3) RETURNING id
    `,
       params
     )
     .then((data) => {
+      console.log(data)
       return data.rows[0];
     })
     .catch((error) => {
-      if (error.code === "23505") {
-        throw {
-          ok: false,
-          status_cod: 400,
-          data: "La fecha ya existe",
-        };
-      }
-      if (error.code === "23503") {
-        throw {
-          ok: false,
-          status_cod: 400,
-          data: "El registro solicitado no existe",
-        };
-      }
-
+      console.log(error);
       throw {
         ok: false,
         status_cod: 500,
@@ -837,7 +817,8 @@ async function insertarEgreso(egreso) {
       };
     })
     .finally(() => pool.end);
-}
+}}
+
 
 async function crearRol(dataRol) {
   const pool = await getConnection();
@@ -917,6 +898,49 @@ async function deleteFechas(dato) {
     .finally(() => pool.end());
 }
 
+async function sumarFechas() {
+  const pool = await getConnection();
+    return pool
+      .query(
+        `     
+        SELECT
+    COALESCE(egresos.mes::text, '0') as mes_egreso,
+    COALESCE(egresos.suma_monto, 0) as monto_egreso,
+    COALESCE(ingresos.mes::text, '0') as mes_ingreso,
+    COALESCE(ingresos.suma_monto, 0) as monto_ingreso,
+    GREATEST(0, COALESCE(ingresos.suma_monto, 0) - COALESCE(egresos.suma_monto, 0)) as resultado,
+    COALESCE(TO_CHAR(fechas_ingresos.fecha1, 'YYYY-MM-DD'), NULL) as fecha,
+    COALESCE(fechas_ingresos.id, 0) as id
+FROM
+    (SELECT * FROM suma_egresos()) as egresos,
+    (SELECT * FROM suma_ingresos()) as ingresos,
+    (
+        SELECT
+            fecha::date AS fecha1,
+            id::int as id
+        FROM ingresos
+        ORDER BY id DESC
+        LIMIT 1
+    ) as fechas_ingresos;
+
+      `)
+      .then((data) => {
+        return data.rowCount > 0 ? data.rows : null;
+      })
+      .catch((error) => {
+        console.log(error)
+        if (error.status_cod) throw error;
+        error.status_cod ? error : null;
+        throw {
+          ok: false,
+          status_cod: 500,
+          data: "Ha ocurrido un error consultando la información en la base de datos",
+        };
+      })
+      .finally(() => pool.end());
+  
+}
+
 module.exports = {
   insertarCliente,
   updateCliente,
@@ -938,9 +962,9 @@ module.exports = {
   getFechas,
   updateFechas,
   validar,
-  insertarIngreso,
-  insertarEgreso,
+  insertarValor,
   crearRol,
   crearPermiso,
   deleteFechas,
+  sumarFechas
 };

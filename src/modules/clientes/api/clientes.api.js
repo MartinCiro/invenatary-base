@@ -8,11 +8,11 @@ const {
   cargarCalendariosMasivo,
   getListarFechas,
   actualizarFecha,
-  insertarIngreso,
-  insertarEgreso,
+  crear
   crearRol,
   crearPermiso,
   deleteFechas,
+  sumarFechas
 } = require("../controller/clientes.controller");
 const ResponseBody = require("../../../shared/model/ResponseBody.model");
 
@@ -392,42 +392,13 @@ const actualizarFechaAPI = async (req, res) => {
   return res.json(message);
 };
 
-const crearIngresoAPI = async (req, res) => {
-  const { descripcion, monto, fecha } = req.body;
-
-  /* const { id_sede } = req.userData; */
-
+const crearAPI = async (req, res) => {
+  const { id, descripcion, monto, fecha, tipo } = req.body;
+  
   try {
-    contratoResponse = await insertarIngreso({ descripcion, monto, fecha });
+    contratoResponse = await crear({ id, descripcion, monto, fecha, tipo });
     message = new ResponseBody(true, 200, {
-      message: "Se ha creado el ingreso exitosamente",
-    });
-  } catch (error) {
-    if (error.data) {
-      message = new ResponseBody(error.ok, error.status_cod, error.data);
-    } else {
-      message = new ResponseBody(false, 500, {
-        message:
-          "Ha ocurrido un error inesperado. Por favor inténtelo nuevamente más tarde",
-      });
-    }
-  }
-
-  return res.json(message);
-};
-
-const crearEgresoAPI = async (req, res) => {
-  const { idi, descripcion, monto, fecha } = req.body;
-
-  try {
-    contratoResponse = await insertarEgreso({
-      idi,
-      descripcion,
-      monto,
-      fecha,
-    });
-    message = new ResponseBody(true, 200, {
-      message: "Se ha creado el egreso exitosamente",
+      message: `Se ha creado el ${tipo} exitosamente`,
     });
   } catch (error) {
     if (error.data) {
@@ -508,6 +479,27 @@ const deleteFechasAPI = async (req, res) => {
 
   return res.json(message);
 };
+
+const sumarFechasAPI = async (req, res) => {
+  
+  try {
+    const response = await sumarFechas();
+    message = new ResponseBody(true, 200, response);
+  } catch (error) {
+    if (error.data) {
+      message = new ResponseBody(error.ok, error.status_cod, error.data);
+    } else {
+      console.log(error);
+      message = new ResponseBody(false, 500, {
+        message:
+          "Ha ocurrido un error inesperado. Por favor inténtelo nuevamente más tarde",
+      });
+    }
+  }
+
+  return res.json(message);
+};
+
 module.exports = {
   crearClienteAPI,
   actualizarClienteAPI,
@@ -518,9 +510,10 @@ module.exports = {
   actualizarCalendarioAPI,
   listarFechasAPI,
   actualizarFechaAPI,
-  crearIngresoAPI,
+  crearAPI,
   crearEgresoAPI,
   crearRolAPI,
   crearPermisoAPI,
   deleteFechasAPI,
+  sumarFechasAPI
 };
