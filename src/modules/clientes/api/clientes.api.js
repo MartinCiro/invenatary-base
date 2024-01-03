@@ -459,10 +459,10 @@ const crearPermisoAPI = async (req, res) => {
 };
 
 const deleteFechasAPI = async (req, res) => {
-  const {id, ide}  = req.query;
+  const {id, tipo}  = req.body;
   let message;
   try {
-    const resultado = await deleteFechas({id, ide});
+    const resultado = await deleteFechas({id, tipo});
     message = new ResponseBody(true, 200, resultado);
   } catch (error) {
     if (error.status_cod) {

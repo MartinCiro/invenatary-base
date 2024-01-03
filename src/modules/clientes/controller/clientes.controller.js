@@ -578,19 +578,10 @@ async function crearPermiso(dataPermiso) {
 }
 
 async function deleteFechas(iden) {
-  let { id } = iden;
-  const { ide } = iden;
-  let tipo;
-  if (id !== undefined && ide !== "null") {
-    tipo = "egresos";
-    id = ide;
-  } else if (id !== undefined && ide === "null") {
-    tipo = "ingresos";
-  } else {
-    tipo = null;
-  }
+  const { id, tipo } = iden;
 
   clienteUtils.validar(id, "el id");
+  clienteUtils.validar(tipo, "el tipo");
   try {
     return await clienteUtils.deleteFechas({ id, tipo });
   } catch (error) {
