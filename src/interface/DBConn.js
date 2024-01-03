@@ -7,7 +7,8 @@ const dbauth = {
     password: config.PasswordBD,
     host: config.ServerDB,
     port: config.PortDB,
-    database: config.Database
+    database: config.Database,
+    ssl: { rejectUnauthorized: true }
 };
 
 const dbauth_impuestos = {
@@ -15,7 +16,7 @@ const dbauth_impuestos = {
   password: config.PasswordBDImpuestos,
   host: config.ServerDB,
   port: config.PortDB,
-  database: config.DatabaseImpuestos,
+  database: config.DatabaseImpuestos
 };
 /**
  * Método para conectarse a la base de datos de nexia automation
