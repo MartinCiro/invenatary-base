@@ -8,7 +8,7 @@ const {
   cargarCalendariosMasivo,
   getListarFechas,
   actualizarFecha,
-  crear
+  crear,
   crearRol,
   crearPermiso,
   deleteFechas,
@@ -511,7 +511,6 @@ module.exports = {
   listarFechasAPI,
   actualizarFechaAPI,
   crearAPI,
-  crearEgresoAPI,
   crearRolAPI,
   crearPermisoAPI,
   deleteFechasAPI,
