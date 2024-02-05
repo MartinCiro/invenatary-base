@@ -887,6 +887,7 @@ async function deleteFechas(dato) {
         : `El ${dato.tipo} no existe`;
     })
     .catch((error) => {
+      console.log(error);
       if (error.status_cod) throw error;
       error.status_cod ? error : null;
       throw {
